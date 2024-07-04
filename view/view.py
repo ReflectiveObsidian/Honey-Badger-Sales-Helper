@@ -69,7 +69,7 @@ class View:
         self.warnings_label = tk.Label(self.warnings_frame, text="Warnings:", bg=Colours.NEUTRAL_HIGHLIGHT)
         self.warnings_label.grid(padx=10, pady=10)
 
-        self.warnings = tk.Label(self.warnings_frame, bg=Colours.NEUTRAL_BACKGROUND, text="waiting...", wraplength=800)
+        self.warnings = tk.Label(self.warnings_frame, bg=Colours.NEUTRAL_BACKGROUND, text="waiting...", wraplength=600)
         self.warnings.grid(padx=10, pady=10, sticky="nsew")
 
         self.call_management_frame = tk.Frame(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND)

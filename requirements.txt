@@ -5,7 +5,7 @@ faster_whisper
 llama-cpp-python # compile for GPU inference
 numpy==1.26.4
 pyaudio
-scikit-learn
+scikit-learn=1.5.0
 transformers
 torch
 soundfile

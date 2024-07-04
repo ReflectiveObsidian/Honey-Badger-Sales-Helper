@@ -4,6 +4,9 @@ class Model:
         self.call_logs_observers = []
         self.salesperson_sound_device_id = 0
         self.customer_sound_device_id = 0
+        self.customer_id = ""
+        self.salesperson_id = ""
+        self.customer_phone = ""
 
         self.initialise()
 
@@ -75,6 +78,27 @@ class Model:
 
     def get_summary(self):
         return self.summary
+    
+    def set_customer_id(self, customer_id):
+        self.customer_id = customer_id
+        self.__update_view()
+
+    def get_customer_id(self):
+        return self.customer_id
+    
+    def set_salesperson_id(self, salesperson_id):
+        self.salesperson_id = salesperson_id
+        self.__update_view()
+
+    def get_salesperson_id(self):
+        return self.salesperson_id
+    
+    def set_customer_phone(self, customer_phone):
+        self.customer_phone = customer_phone
+        self.__update_view()
+
+    def get_customer_phone(self):
+        return self.customer_phone
 
     def initialise(self):
         self.call_logs = []
@@ -83,6 +107,7 @@ class Model:
         self.warnings = ""
         self.todo_list = "Generating..."
         self.summary = "Generating..."
+
         self.__update_view()
 
     def __update_view(self):

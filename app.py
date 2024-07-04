@@ -85,10 +85,14 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.llm_chat_processor_thread.start()
 
     def save_conversation(self):
+        customer_id = self.model.get_customer_id()
+        customer_phone = self.model.get_customer_phone()
+        salesperson_id = self.model.get_salesperson_id()
         todo = self.model.get_todo_list()
         summary = self.model.get_summary()
 
-        conversation = f"Summary: {summary}\n\nTo-Do: {todo}"
+        conversation = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\nSummary: {summary}\nTodo: {todo}\n"
+
         SaveData.save(conversation)
 
     def handle_salesperson_device_selected(self, device_id):
@@ -96,6 +100,15 @@ class Controller(TKMT.ThemedTKinterFrame):
 
     def handle_customer_device_selected(self, device_id):
         self.model.set_customer_sound_device_id(device_id)
+
+    def handle_customer_id(self, customer_id):
+        self.model.set_customer_id(customer_id)
+
+    def handle_customer_phone(self, customer_phone):
+        self.model.set_customer_phone(customer_phone)
+
+    def handle_salesperson_id(self, salesperson_id):
+        self.model.set_salesperson_id(salesperson_id)
         
 if __name__ == "__main__":
     app = Controller()

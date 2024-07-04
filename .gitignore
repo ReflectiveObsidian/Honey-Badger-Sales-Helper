@@ -161,3 +161,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 llm_chat_processors/llm_models/Phi-3-mini-4k-instruct-q4.gguf
+data.txt

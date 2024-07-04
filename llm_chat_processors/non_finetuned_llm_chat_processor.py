@@ -106,19 +106,19 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         self.enabled = False
 
     def run(self):
-        if self.active:
-            print ("LLM is already active")
-        while self.active:
-            sleep(0.1)
-        print ("LLM not active, going ahead")
-        self.active = True
-
         model_callback = self.model_callback
         type = self.type
         chat_log = self.chat_log
         min_chat_history = self.min_chat_history
         max_chat_history = self.max_chat_history
         prompt_method = self.prompt_method
+
+        if self.active:
+            print ("LLM is already active")
+        while self.active:
+            sleep(0.1)
+        print ("LLM not active, going ahead")
+        self.active = True
 
         # PROMPT LLM HERE -----------------------------------
         if min_chat_history is not None and len(chat_log) <= min_chat_history:

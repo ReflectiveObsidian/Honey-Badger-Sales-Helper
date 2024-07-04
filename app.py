@@ -70,6 +70,10 @@ class Controller(TKMT.ThemedTKinterFrame):
     def handle_end_call(self):
         if self.call_manager is not None:
             self.call_manager.end_call()
+        self.generate_end_call_items()
+        
+
+    def generate_end_call_items(self):
         print("calling summary generation")
         self.llm_chat_processor.set_prompt(PromptType.SUMMARY, self.model.get_call_logs(), lambda todo: self.model.set_summary(todo), False)
         self.llm_chat_processor_thread = threading.Thread(target=self.llm_chat_processor.run)
@@ -78,6 +82,7 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.llm_chat_processor.set_prompt(PromptType.TODO, self.model.get_call_logs(), lambda todo: self.model.set_todo_list(todo), False)
         self.llm_chat_processor_thread = threading.Thread(target=self.llm_chat_processor.run)
         self.llm_chat_processor_thread.start()
+
         
 
     def handle_salesperson_device_selected(self, device_id):

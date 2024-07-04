@@ -1,6 +1,31 @@
 # Sales-Agent-Helper
 Sales agent helper is a client app for sales agents that helps them maintain efficiency during calls.
 
+# Installation steps
+- Download and install python 3.12 from https://www.python.org/downloads/
+    - When installing, select "Add python.exe to PATH" and "Disable path length limit"
+- Download the source code and extract the contents.
+- Open a terminal in the project folder and run
+    - pip install -r requirements.txt"
+    - pip install SpeechRecognition[whisper-local]
+- Download visual studio installer (Community Version) from https://visualstudio.microsoft.com/downloads/
+    - Install the components:
+        - C++ CMake tools for Windows
+            - This includes MSVC v143
+        - C++ core features
+        - Windows 10/11 SDK
+- Download and install CUDA 12.5 from https://developer.nvidia.com/cuda-downloads using the default settings
+- Download cuDNN 8.9.7 from https://developer.nvidia.com/downloads/compute/cudnn/secure/8.9.7/local_installers/12.x/cudnn-windows-x86_64-8.9.7.29_cuda12-archive.zip/
+    - Extract the zip file, and copy the contents into "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5", replacing existing files.
+- Open a terminal in the project folder and run:
+    - $env:CMAKE_ARGS = "-DGGML_CUDA=ON -DGGML_CUDA_F16=ON -DBUILD_SHARED_LIBS=ON"
+    - $env:FORCE_CMAKE=1
+    - pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+- Download https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf?download=true and move the file into Honey-Badger-Sales-Helper/llm_chat_processors/llm_models/Phi-3-mini-4k-instruct-q4.gguf
+- Download https://huggingface.co/SamLowe/roberta-base-go_emotions/resolve/main/model.safetensors?download=true into Honey-Badger-Sales-Helper\chat_processors\resources\Emotion
+
+
+
 # Requirements
 See requirements.txt for python libraries used.
 Other requirements:

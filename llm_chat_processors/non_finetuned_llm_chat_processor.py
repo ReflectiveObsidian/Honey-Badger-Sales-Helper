@@ -144,7 +144,7 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
                     warnings += warning.strip()
                 model_callback(warnings)
             if self.mode == 3:
-                if "NONE" in output:
+                if "NONE" in output.capitalize():
                      model_callback("Good Job!")
                 else:
                     model_callback(output)

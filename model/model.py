@@ -69,12 +69,20 @@ class Model:
         self.todo_list = todo
         self.__update_view()
 
+    def set_summary(self, summary):
+        self.summary = summary
+        self.__update_view()
+
+    def get_summary(self):
+        return self.summary
+
     def initialise(self):
         self.call_logs = []
         self.emotion = ["waiting..."]
         self.personalities = ["waiting..."]
         self.warnings = ""
         self.todo_list = "Generating..."
+        self.summary = "Generating..."
         self.__update_view()
 
     def __update_view(self):

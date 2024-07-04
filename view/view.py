@@ -16,7 +16,7 @@ class View:
         #master.geometry("800x1000")
         master.configure(bg=Colours.THEMED_BACKGROUND)
         self.controller = controller
-        self.call_done_view = CallDoneView(master, back_view=self)
+        self.call_done_view = CallDoneView(master, back_view=self, controller=self.controller)
 
         self.style = ttk.Style()
         self.style.configure("Themed.TFrame", background=Colours.THEMED_BACKGROUND)

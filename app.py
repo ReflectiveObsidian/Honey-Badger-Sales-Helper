@@ -5,6 +5,7 @@ import TKinterModernThemes as TKMT
 from llm_chat_processors.prompt_type import PromptType
 from model.model import Model
 from view.view import View
+from utilities.save_data import SaveData
 
 # LLM Chat Processors
 from llm_chat_processors.stub.llm_chat_processor_stub import LLMChatProcessorStub
@@ -83,7 +84,12 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.llm_chat_processor_thread = threading.Thread(target=self.llm_chat_processor.run)
         self.llm_chat_processor_thread.start()
 
-        
+    def save_conversation(self):
+        todo = self.model.get_todo_list()
+        summary = self.model.get_summary()
+
+        conversation = f"Summary: {summary}\n\nTo-Do: {todo}"
+        SaveData.save(conversation)
 
     def handle_salesperson_device_selected(self, device_id):
         self.model.set_salesperson_sound_device_id(device_id)

@@ -6,9 +6,10 @@ from tkinter import ttk
 from view.colours import Colours
 
 class CallDoneView:
-    def __init__(self, master=None, back_view=None):
+    def __init__(self, master=None, back_view=None, controller=None):
         self.master = master
         self.back_view = back_view
+        self.controller = controller
         #self.frame = tk.Frame(self.master, bg=Colours.THEMED_BACKGROUND)
         self.style = ttk.Style()
         self.style.configure("Themed.TFrame", background=Colours.THEMED_BACKGROUND)
@@ -28,8 +29,14 @@ class CallDoneView:
         self.todo_list = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 10)
         self.todo_list.grid(padx=10, pady=10, sticky="ew")
 
-        self.back_button = ttk.Button(self.frame.master, text='Go back', command=self.go_back)
-        self.back_button.grid(padx=10, pady=10)
+        self.button_frame = tk.Frame(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND)
+        self.button_frame.grid(padx=10, pady=10, sticky="ew")
+
+        self.back_button = ttk.Button(self.button_frame, text='Go back', command=self.go_back)
+        self.back_button.grid(padx=10, pady=10, row=0, column=0)
+
+        self.save_button = ttk.Button(self.button_frame, text='Save Conversation', command=self.save_conversation)
+        self.save_button.grid(padx=10, pady=10, row=0, column=1)
 
     def start_page(self):
         self.frame.master.grid(sticky="nsew")
@@ -37,6 +44,9 @@ class CallDoneView:
     def go_back(self):
         self.frame.master.grid_forget()
         self.back_view.start_page()
+
+    def save_conversation(self):
+        self.controller.save_conversation()
 
     def update(self, model):
         self.call_logs.delete('1.0', tk.END)

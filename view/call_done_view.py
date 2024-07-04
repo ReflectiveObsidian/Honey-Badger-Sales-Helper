@@ -19,10 +19,13 @@ class CallDoneView:
         
         tk.Label(self.frame.master, text='End-of-call summary', font=("Helvetica", 16), bg=Colours.THEMED_BACKGROUND).grid(padx=10, pady=10)
 
-        self.call_logs = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 25)
+        self.call_logs = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 15)
         self.call_logs.grid(padx=10, pady=10, sticky="ew")
 
-        self.todo_list = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 15)
+        self.summary = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 10)
+        self.summary.grid(padx=10, pady=10, sticky="ew")
+
+        self.todo_list = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 10)
         self.todo_list.grid(padx=10, pady=10, sticky="ew")
 
         self.back_button = ttk.Button(self.frame.master, text='Go back', command=self.go_back)
@@ -42,6 +45,9 @@ class CallDoneView:
 
         self.todo_list.delete('1.0', tk.END)
         self.todo_list.insert('insert', model.get_todo_list())
+
+        self.summary.delete('1.0', tk.END)
+        self.summary.insert('insert', model.get_summary())
 
     def formatted_call_logs(self, call_logs):
         return "\n\n".join([str(call_log) for call_log in call_logs])

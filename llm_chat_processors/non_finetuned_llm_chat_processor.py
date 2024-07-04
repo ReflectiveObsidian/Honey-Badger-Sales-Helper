@@ -17,10 +17,11 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         model_kwargs = {
                 "n_ctx":4096,    # Context length to use
                 "n_threads":4,   # Number of CPU threads to use
-                "n_gpu_layers": 33, # Number of model layers to offload to GPU. Set to 0 if only using CPU
+                "n_gpu_layers": 0, # Number of model layers to offload to GPU. Set to 0 if only using CPU
         }
         self.llm = Llama(model_path = model_path, **model_kwargs)
-        self.explain = False
+        self.mode = 3
+        
         # -------------------------------------------------------------
 
     def set_prompt(self, type: PromptType, chatlog, model_callback, enabled):
@@ -36,18 +37,25 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
                 "echo":False,
                 "top_k":1
             }
-            if self.explain:
+            
+            if self.mode == 1:
                 self.prompt_method = lambda chatlog_string: self.llm(self.generate_prompt(
                         "You are a salesperson.",
                         "Based on this chat history, do you think you have exaggerated or given empty promises? Respond only with EXAGGERATION and/or EMPTY PROMISE, separated by commas. Do not include anything else.\n" + chatlog_string),
                     **generation_kwargs
                 )
-            else:
+            elif self.mode == 2:
                 self.prompt_method = lambda chatlog_string: self.llm(self.generate_prompt(
                     "You are a salesperson.",
                     "Based on this chat history, do you think you have exaggerated or given empty promises? Respond only with EXAGGERATION and/or EMPTY PROMISE, separated by commas. Use the format <warning type> # <explanation>.\n" + chatlog_string),
                 **generation_kwargs
-            )
+                )
+            elif self.mode == 3:
+                self.prompt_method = lambda chatlog_string: self.llm(self.generate_prompt(
+                    "You are a salesperson's supervisor.",
+                    chatlog_string + "\nDid the salesperon exaggerate or give an empty promise? Respond with NONE, EXAGGERATION or EMPTY PROMISE. Use the format <warning type>: <relevant quote>. For example: EXAGGERATION: \"these pills will comeletely cure your pain\"\n"),
+                **generation_kwargs
+                )
             self.min_chat_history = 3
             self.max_chat_history = 5
             print("prompting warnings")
@@ -65,6 +73,21 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
             )
             self.min_chat_history = None
             self.max_chat_history = None
+        elif type == PromptType.SUMMARY:
+            generation_kwargs = {
+                "max_tokens":100000,
+                "stop": "<|assistant|>",
+                "echo":False,
+                "top_k":1
+            }
+            self.prompt_method = lambda chatlog_string: self.llm(self.generate_prompt(
+                    "You are a salesperson.",
+                    "Create a short summary of your conversation with the customer.\n" + chatlog_string),
+                **generation_kwargs
+            )
+            self.min_chat_history = None
+            self.max_chat_history = None
+
 
     def generate_prompt(self, role: str, question: str) -> str:
         return f"<|system|>\n{role}<|end|>\n{question}<|end|>\n<|assistant|>"
@@ -95,6 +118,7 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         chat_log = self.chat_log
         min_chat_history = self.min_chat_history
         max_chat_history = self.max_chat_history
+        prompt_method = self.prompt_method
 
         # PROMPT LLM HERE -----------------------------------
         if min_chat_history is not None and len(chat_log) <= min_chat_history:
@@ -106,10 +130,10 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         for chat in chat_log:
             chatlog_string += chat.speaker + ": " + chat.content + "\n"
         if type == PromptType.WARNINGS:
-            output = self.prompt_method(chatlog_string)["choices"][0]["text"]
-            if self.explain:
+            output = prompt_method(chatlog_string)["choices"][0]["text"]
+            if self.mode == 1:
                 model_callback(output)
-            else:
+            if self.mode == 2:
                 warnings = ""
                 for line in output.split("\n"):
                     if line == "":
@@ -119,9 +143,18 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
                         warnings += ", "
                     warnings += warning.strip()
                 model_callback(warnings)
+            if self.mode == 3:
+                if "NONE" in output:
+                     model_callback("Good Job!")
+                else:
+                    model_callback(output)
         elif type == PromptType.TODO:
             model_callback("Creating to-do list...")
-            output = self.prompt_method(chatlog_string)["choices"][0]["text"]
+            output = prompt_method(chatlog_string)["choices"][0]["text"]
+            model_callback(output)
+        elif type == PromptType.SUMMARY:
+            model_callback("Creating summary...")
+            output = prompt_method(chatlog_string)["choices"][0]["text"]
             model_callback(output)
         # --------------------------------------------------
         self.active = False

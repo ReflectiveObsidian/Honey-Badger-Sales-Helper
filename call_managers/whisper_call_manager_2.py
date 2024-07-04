@@ -19,8 +19,8 @@ class WhisperCallManager2(CallManager):
         # Called asynchonously by recognizer
         def callback_salesperson(recognizer, audio):
             try:
-                result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                #result = self.recognize_faster_whisper(audio)
+                #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
+                result = self.recognize_faster_whisper(audio)
             except sr.UnknownValueError:
                 result = "Whisper could not understand audio"
             except sr.RequestError as e:
@@ -32,8 +32,8 @@ class WhisperCallManager2(CallManager):
 
         def callback_customer(recognizer, audio):
             try:
-                result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                #result = self.recognize_faster_whisper(audio)
+                #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
+                result = self.recognize_faster_whisper(audio)
             except sr.UnknownValueError:
                 result = "Whisper could not understand audio"
             except sr.RequestError as e:

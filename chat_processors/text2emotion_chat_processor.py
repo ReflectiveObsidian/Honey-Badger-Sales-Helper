@@ -8,8 +8,8 @@ class Text2EmotionChatProcessor(ChatProcessor):
         self.model_callback = model_callback
         from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
         # Load the model and tokenizer from the local directory
-        model = AutoModelForSequenceClassification.from_pretrained("./chat_processors/resources/Emotion")
-        tokenizer = AutoTokenizer.from_pretrained("./chat_processors/resources/Emotion")
+        tokenizer = AutoTokenizer.from_pretrained("SamLowe/roberta-base-go_emotions")
+        model = AutoModelForSequenceClassification.from_pretrained("SamLowe/roberta-base-go_emotions")
         self.classifier = pipeline("text-classification", model=model, tokenizer=tokenizer, top_k=None)
 
     def process_chat(self, chat_logs):

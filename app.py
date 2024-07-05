@@ -46,18 +46,18 @@ class Controller(TKMT.ThemedTKinterFrame):
 
         salesperson_device_id_callback = lambda: self.model.get_salesperson_sound_device_id()
         customer_device_id_callback = lambda: self.model.get_customer_sound_device_id()
-        self.call_manager = CallStub(
+        '''self.call_manager = CallStub(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
-            customer_device_id_callback) # To Replace
+            customer_device_id_callback) # To Replace'''
         ''' self.call_manager = WhisperCallManager(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback)'''
-        '''self.call_manager = WhisperCallManager2(
+        self.call_manager = WhisperCallManager2(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
-            customer_device_id_callback)'''
+            customer_device_id_callback)
 
     def handle_start_call(self):
         self.model.initialise()

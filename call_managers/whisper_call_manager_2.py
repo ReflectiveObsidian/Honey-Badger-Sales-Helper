@@ -58,12 +58,22 @@ class WhisperCallManager2(CallManager):
         self.customer_microphone = sr.Microphone(device_index= device_index_customer)
         print("[WCM2] customer device index: ", device_index_customer)
         
+        print("calibrating devices")
         print("[WCM2] 1")
         with self.salesperson_microphone as source:
-            self.salesperson_recognizer.adjust_for_ambient_noise(source)
+            self.salesperson_recognizer.adjust_for_ambient_noise(source, duration = 3)
         print("[WCM2] 1.1")
         with self.customer_microphone as source:
-            self.customer_recognizer.adjust_for_ambient_noise(source)
+            self.customer_recognizer.adjust_for_ambient_noise(source, duration = 3)
+
+        print("finish calibrating devices")
+
+        self.salesperson_recognizer.energy_threshold += 1000
+        self.customer_recognizer.energy_threshold += 1000
+
+        print(f"salesperson energy threshold is{self.salesperson_recognizer.energy_threshold}")
+        print(f"customer energy threshold is{self.customer_recognizer.energy_threshold}")
+
         print("[WCM2] 2")
         # Starts listening and reutrns a function to stop listening
         print("starting salesperson mic")

@@ -1,7 +1,7 @@
 <img src="images/HoneyBadgerIcon.png" alt="drawing" width="200"/>
 
-# Sales-Agent-Helper
-Sales agent helper is a client app for sales agents that helps them maintain efficiency during calls.
+# Honey-Badger-Sales-Helper
+Honey Badger Sales Helper is a client app for sales agents that helps them maintain efficiency during calls.
 
 # Features
 - Recording of customer information

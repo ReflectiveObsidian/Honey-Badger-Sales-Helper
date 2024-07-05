@@ -38,6 +38,9 @@ class CallDoneView:
         self.save_button = ttk.Button(self.button_frame, text='Save Conversation', command=self.save_conversation)
         self.save_button.grid(padx=10, pady=10, row=0, column=1)
 
+        self.notify_button = ttk.Button(self.button_frame, text='Email Summary', command=self.controller.notify)
+        self.notify_button.grid(padx=10, pady=10, row=0, column=2)
+
     def start_page(self):
         self.frame.master.grid(sticky="nsew")
 

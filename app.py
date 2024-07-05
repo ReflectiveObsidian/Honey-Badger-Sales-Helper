@@ -1,6 +1,7 @@
 import queue
 import threading
 import TKinterModernThemes as TKMT
+import webbrowser
 
 from llm_chat_processors.prompt_type import PromptType
 from model.model import Model
@@ -85,15 +86,28 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.llm_chat_processor_thread.start()
 
     def save_conversation(self):
+        conversation = self.generate_call_summary()
+        SaveData.save(conversation)
+
+    def notify(self):
+        email = ""
+        subject = "Sales call with " + self.model.get_customer_id() + " by " + self.model.get_salesperson_id()
+        body = self.generate_call_summary()
+
+        mailto_link = f"mailto:{email}?subject={subject}&body={body}".replace("\n", "%0D%0A")
+        webbrowser.open(mailto_link)
+
+    def generate_call_summary(self):
         customer_id = self.model.get_customer_id()
         customer_phone = self.model.get_customer_phone()
         salesperson_id = self.model.get_salesperson_id()
         todo = self.model.get_todo_list()
         summary = self.model.get_summary()
 
-        conversation = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\nSummary: {summary}\nTodo: {todo}\n"
+        summary = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\n\nSummary: \n{summary}\n\nTodo: \n{todo}\n"
 
-        SaveData.save(conversation)
+        return summary
+
 
     def handle_salesperson_device_selected(self, device_id):
         self.model.set_salesperson_sound_device_id(device_id)

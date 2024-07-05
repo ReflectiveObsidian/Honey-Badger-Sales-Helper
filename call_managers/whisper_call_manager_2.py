@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from time import sleep
-
+import audioop
 import speech_recognition as sr
 
 from call_managers.call_manager import CallManager
@@ -19,8 +19,18 @@ class WhisperCallManager2(CallManager):
         # Called asynchonously by recognizer
         def callback_salesperson(recognizer, audio):
             try:
+                print("transcribing salesperson")
+                start = datetime.now()
+                # Calculate energy level
+                raw_data = audio.get_raw_data()
+                energy = audioop.rms(raw_data, audio.sample_width)
+                print(f"Salesperson audio energy level: {energy}, {audio.sample_width}")
+
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
                 result = self.recognize_faster_whisper(audio)
+                end = datetime.now()
+                time_completion = end-start
+                print(f"finish transcribing salesperson {time_completion}")
             except sr.UnknownValueError:
                 result = "Whisper could not understand audio"
             except sr.RequestError as e:
@@ -32,8 +42,19 @@ class WhisperCallManager2(CallManager):
 
         def callback_customer(recognizer, audio):
             try:
+                print("transcribing customer")
+                start = datetime.now()  
+
+                raw_data = audio.get_raw_data()
+                energy = audioop.rms(raw_data, audio.sample_width)
+                print(f"customer audio energy level: {energy}, {audio.sample_width}")
+
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
                 result = self.recognize_faster_whisper(audio)
+
+                end = datetime.now()
+                time_completion = end-start
+                print(f"finish transcribing customer {time_completion}")
             except sr.UnknownValueError:
                 result = "Whisper could not understand audio"
             except sr.RequestError as e:
@@ -44,8 +65,9 @@ class WhisperCallManager2(CallManager):
 
         self.salesperson_recognizer = sr.Recognizer()
         self.customer_recognizer = sr.Recognizer()
-        self.salesperson_recognizer.energy_threshold = 4000
-        self.customer_recognizer.energy_threshold = 4000
+        self.salesperson_recognizer.dynamic_energy_threshold = False
+        self.customer_recognizer.dynamic_energy_threshold = False
+
 
     def start_call(self):
         print("[WCM2] call start fn")
@@ -68,8 +90,8 @@ class WhisperCallManager2(CallManager):
 
         print("finish calibrating devices")
 
-        self.salesperson_recognizer.energy_threshold += 1000
-        self.customer_recognizer.energy_threshold += 1000
+        self.salesperson_recognizer.energy_threshold += 100
+        self.customer_recognizer.energy_threshold += 100
 
         print(f"salesperson energy threshold is{self.salesperson_recognizer.energy_threshold}")
         print(f"customer energy threshold is{self.customer_recognizer.energy_threshold}")

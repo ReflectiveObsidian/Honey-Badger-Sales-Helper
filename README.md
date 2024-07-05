@@ -1,4 +1,4 @@
-![Honey Badger Icon](png images/HoneyBadgerIcon.png)
+![Honey Badger Icon](images/HoneyBadgerIcon.png)
 
 # Sales-Agent-Helper
 Sales agent helper is a client app for sales agents that helps them maintain efficiency during calls.

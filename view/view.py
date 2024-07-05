@@ -1,6 +1,7 @@
 import tkinter as tk
 import TKinterModernThemes as TKMT
 
+from tkinter import PhotoImage
 from tkinter import scrolledtext
 from tkinter import ttk
 
@@ -17,6 +18,9 @@ class View:
         master.configure(bg=Colours.THEMED_BACKGROUND)
         self.controller = controller
         self.call_done_view = CallDoneView(master, back_view=self, controller=self.controller)
+
+        icon=PhotoImage(file="images\\HoneyBadgerIcon.png")
+        master.iconphoto(True,icon)
 
         self.style = ttk.Style()
         self.style.configure("Themed.TFrame", background=Colours.THEMED_BACKGROUND)

@@ -1,3 +1,5 @@
+![Honey Badger Icon](png images/HoneyBadgerIcon.png)
+
 # Sales-Agent-Helper
 Sales agent helper is a client app for sales agents that helps them maintain efficiency during calls.
 
@@ -36,3 +38,4 @@ https://developer.nvidia.com/downloads/compute/cudnn/secure/8.9.7/local_installe
 
 # Credits
 - Created with the help of Github Copilot
+- Badger Icon generated with Copilot Designer

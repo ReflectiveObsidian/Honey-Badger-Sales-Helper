@@ -3,6 +3,14 @@
 # Sales-Agent-Helper
 Sales agent helper is a client app for sales agents that helps them maintain efficiency during calls.
 
+# Features
+- Recording of customer information
+- Live transcription of salesperson and customer
+- Realtime analysis of customer emotion and personality
+- Realtime alerts for inappropriate statements
+- Summarises the sales call and creates a to-do list
+- Option to save or email a record of the sales call
+
 # Installation steps
 - Download and install python 3.12 from https://www.python.org/downloads/
     - When installing, select "Add python.exe to PATH" and "Disable path length limit"

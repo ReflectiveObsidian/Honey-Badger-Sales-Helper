@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 llm_chat_processors/llm_models/Phi-3-mini-4k-instruct-q4.gguf
 data.txt
+chat_processors/resources/Emotion/model.safetensors

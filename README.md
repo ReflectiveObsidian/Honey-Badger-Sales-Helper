@@ -7,7 +7,13 @@ Honey Badger Sales Helper is a client app for sales agents that helps them maint
 - Recording of customer information
 - Live transcription of salesperson and customer
 - Realtime analysis of customer emotion and personality
+
+    <img src="images\EmotionPersonalityShowcase.png" width="150">
+
 - Realtime alerts for inappropriate statements
+
+    <img src="images\WarningsShowcase.png" width="500">
+
 - Summarises the sales call and creates a to-do list
 - Option to save or email a record of the sales call
 

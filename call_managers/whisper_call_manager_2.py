@@ -25,9 +25,13 @@ class WhisperCallManager2(CallManager):
                 raw_data = audio.get_raw_data()
                 energy = audioop.rms(raw_data, audio.sample_width)
                 print(f"Salesperson audio energy level: {energy}, {audio.sample_width}")
+                print(f"current salesperson energy threshold is {self.salesperson_recognizer.energy_threshold}")
 
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                result = self.recognize_faster_whisper(audio)
+                if energy > self.salesperson_recognizer.energy_threshold:
+                    result = self.recognize_faster_whisper(audio)
+                else:
+                    result = " "
                 end = datetime.now()
                 time_completion = end-start
                 print(f"finish transcribing salesperson {time_completion}")
@@ -48,9 +52,13 @@ class WhisperCallManager2(CallManager):
                 raw_data = audio.get_raw_data()
                 energy = audioop.rms(raw_data, audio.sample_width)
                 print(f"customer audio energy level: {energy}, {audio.sample_width}")
+                print(f"current customer energy threshold is {self.customer_recognizer.energy_threshold}")
 
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                result = self.recognize_faster_whisper(audio)
+                if energy > self.salesperson_recognizer.energy_threshold:
+                    result = self.recognize_faster_whisper(audio)
+                else:
+                    result = " "
 
                 end = datetime.now()
                 time_completion = end-start

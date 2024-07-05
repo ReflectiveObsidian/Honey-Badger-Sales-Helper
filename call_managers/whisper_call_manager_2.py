@@ -40,7 +40,8 @@ class WhisperCallManager2(CallManager):
             except sr.RequestError as e:
                 result = "Sphinx error; {0}".format(e)
             print("[WCM2] Salesperson: ", result)
-            self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
+            if energy > self.salesperson_recognizer.energy_threshold:
+                self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
 
         self.speech_recognition_callback_salesperson = callback_salesperson
 
@@ -68,7 +69,8 @@ class WhisperCallManager2(CallManager):
             except sr.RequestError as e:
                 result = f"Could not request results from Whisper; {e}"
             print("[WCM2] Customer: ", result)
-            self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+            if energy > self.customer_recognizer.energy_threshold:
+                self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
         self.speech_recognition_callback_customer = callback_customer
 
         self.salesperson_recognizer = sr.Recognizer()

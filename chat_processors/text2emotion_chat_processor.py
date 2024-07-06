@@ -13,6 +13,8 @@ class Text2EmotionChatProcessor(ChatProcessor):
         self.classifier = pipeline("text-classification", model=model, tokenizer=tokenizer, top_k=None)
 
     def process_chat(self, chat_logs):
+        # Select chat logs with speaker as customer
+        chat_logs = [chat_log for chat_log in chat_logs if chat_log.speaker == "Customer"]
         # Select last 3 chat logs
         chat_logs = chat_logs[-3:]
         # Get the text from the chat logs

@@ -16,6 +16,7 @@ from llm_chat_processors.non_finetuned_llm_chat_processor import NonFinetunedLLM
 from call_managers.stub.call_stub import CallStub
 from call_managers.whisper_call_manager import WhisperCallManager
 from call_managers.whisper_call_manager_2 import WhisperCallManager2
+from call_managers.demo_sales_call_manager import DemoSalesCallManager
 
 # Chat Processors
 from chat_processors.stub.emotion_stub import EmotionStub
@@ -55,7 +56,11 @@ class Controller(TKMT.ThemedTKinterFrame):
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback)'''
-        self.call_manager = WhisperCallManager2(
+        '''self.call_manager = WhisperCallManager2(
+            lambda call_log: self.model.add_call_log(call_log),
+            salesperson_device_id_callback,
+            customer_device_id_callback)'''
+        self.call_manager = DemoSalesCallManager(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback)

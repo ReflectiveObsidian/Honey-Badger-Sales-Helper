@@ -22,6 +22,8 @@ class Text2MBTIChatProcessor(ChatProcessor):
             self.loaded_vectorizer = pickle.load(file)
 
     def process_chat(self, chat_logs):
+        # Select chat logs with speaker as customer
+        chat_logs = [chat_log for chat_log in chat_logs if chat_log.speaker == "Customer"]
         # Select last 3 chat logs
         chat_logs = chat_logs[-10:]
         # Get the text from the chat logs

@@ -64,7 +64,7 @@ class DemoSalesCallManager(CallManager):
                     mink_content_id = 0
                     sleep(10)
 
-            sleep(2)
+            sleep(5)
 
     def end_call(self):
         self.inCall = False

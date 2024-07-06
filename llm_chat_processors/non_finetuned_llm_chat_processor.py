@@ -53,7 +53,7 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
             elif self.mode == 3:
                 self.prompt_method = lambda chatlog_string: self.llm(self.generate_prompt(
                     "You are a salesperson's supervisor.",
-                    chatlog_string + "\nDid the salesperon exaggerate or give an empty promise? Respond with NONE, EXAGGERATION or EMPTY PROMISE. Use the format <warning type>: <relevant quote>. For example: EXAGGERATION: \"these pills will comeletely cure your pain\"\n"),
+                    chatlog_string + "\nDid the salesperon exaggerate or give an empty promise? Respond with NONE, EXAGGERATION or EMPTY PROMISE. Use the format <warning type>: <relevant quote> when the warning is applicable. For example: EXAGGERATION: \"these pills will comeletely cure your pain\"\n"),
                 **generation_kwargs
                 )
             self.min_chat_history = 3
@@ -144,7 +144,9 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
                     warnings += warning.strip()
                 model_callback(warnings)
             if self.mode == 3:
+                print(output)
                 if "NONE" in output.upper():
+                     
                      model_callback("Good Job!")
                 else:
                     model_callback(output)

@@ -90,7 +90,7 @@ class WhisperCallManager2(CallManager):
         self.customer_microphone = sr.Microphone(device_index= device_index_customer)
         print("[WCM2] customer device index: ", device_index_customer)
         
-        print("calibrating devices")
+        print("calibrating devices... please do not speak during this time")
         print("[WCM2] 1")
         with self.salesperson_microphone as source:
             self.salesperson_recognizer.adjust_for_ambient_noise(source, duration = 3)

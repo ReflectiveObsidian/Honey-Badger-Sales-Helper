@@ -56,14 +56,14 @@ class Controller(TKMT.ThemedTKinterFrame):
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback)'''
-        '''self.call_manager = WhisperCallManager2(
-            lambda call_log: self.model.add_call_log(call_log),
-            salesperson_device_id_callback,
-            customer_device_id_callback)'''
-        self.call_manager = DemoSalesCallManager(
+        self.call_manager = WhisperCallManager2(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback)
+        '''self.call_manager = DemoSalesCallManager(
+            lambda call_log: self.model.add_call_log(call_log),
+            salesperson_device_id_callback,
+            customer_device_id_callback)'''
 
     def handle_start_call(self):
         self.model.initialise()

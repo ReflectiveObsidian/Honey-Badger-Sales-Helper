@@ -39,6 +39,7 @@ Honey Badger Sales Helper is a client app for sales agents that helps them maint
     - pip install numpy==1.26.4
 - Download https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf?download=true and move the file into Honey-Badger-Sales-Helper/llm_chat_processors/llm_models/Phi-3-mini-4k-instruct-q4.gguf
 - Restart your computer
+- run "python -m app" to start the app
 
 
 

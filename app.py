@@ -1,6 +1,7 @@
 import queue
 import threading
 import TKinterModernThemes as TKMT
+from urllib.parse import quote
 import webbrowser
 
 from llm_chat_processors.prompt_type import PromptType
@@ -99,7 +100,7 @@ class Controller(TKMT.ThemedTKinterFrame):
         subject = "Sales call with " + self.model.get_customer_id() + " by " + self.model.get_salesperson_id()
         body = self.generate_call_summary()
 
-        mailto_link = f"mailto:{email}?subject={subject}&body={body}".replace("\n", "%0D%0A")
+        mailto_link = f"mailto:{quote(email)}?subject={quote(subject)}&body={quote(body)}"
         webbrowser.open(mailto_link)
 
     def generate_call_summary(self):

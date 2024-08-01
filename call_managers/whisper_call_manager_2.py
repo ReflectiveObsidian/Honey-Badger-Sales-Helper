@@ -1,5 +1,7 @@
 # When started, periodically calls the add_call_log_callback with a CallLog object
 
+import threading
+
 from datetime import datetime
 from time import sleep
 import audioop
@@ -16,22 +18,12 @@ class WhisperCallManager2(CallManager):
         self.salesperson_device_id_callback = salesperson_device_id_callback
         self.customer_device_id_callback = customer_device_id_callback
 
-        # Called asynchonously by recognizer
-        def callback_salesperson(recognizer, audio):
+        def callback_salesperson_handler(recognizer, audio):  
             try:
                 print("transcribing salesperson")
                 start = datetime.now()
-                # Calculate energy level
-                raw_data = audio.get_raw_data()
-                energy = audioop.rms(raw_data, audio.sample_width)
-                print(f"Salesperson audio energy level: {energy}, {audio.sample_width}")
-                print(f"current salesperson energy threshold is {self.salesperson_recognizer.energy_threshold}")
-
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                if energy > self.salesperson_recognizer.energy_threshold:
-                    result = self.recognize_faster_whisper(audio)
-                else:
-                    result = " "
+                result = self.recognize_faster_whisper(audio)
                 end = datetime.now()
                 time_completion = end-start
                 print(f"finish transcribing salesperson {time_completion}")
@@ -40,26 +32,23 @@ class WhisperCallManager2(CallManager):
             except sr.RequestError as e:
                 result = "Sphinx error; {0}".format(e)
             print("[WCM2] Salesperson: ", result)
-            if energy > self.salesperson_recognizer.energy_threshold:
-                self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
+            self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
+
+        # Called asynchonously by recognizer
+        def callback_salesperson(recognizer, audio):
+            self.callback_salesperson_thread = threading.Thread(target=callback_salesperson_handler, args=[recognizer, audio])
+            self.callback_salesperson_thread.start()
+            
 
         self.speech_recognition_callback_salesperson = callback_salesperson
 
-        def callback_customer(recognizer, audio):
+        def callback_customer_handler(recognizer, audio): 
             try:
                 print("transcribing customer")
                 start = datetime.now()  
 
-                raw_data = audio.get_raw_data()
-                energy = audioop.rms(raw_data, audio.sample_width)
-                print(f"customer audio energy level: {energy}, {audio.sample_width}")
-                print(f"current customer energy threshold is {self.customer_recognizer.energy_threshold}")
-
                 #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
-                if energy > self.salesperson_recognizer.energy_threshold:
-                    result = self.recognize_faster_whisper(audio)
-                else:
-                    result = " "
+                result = self.recognize_faster_whisper(audio)
 
                 end = datetime.now()
                 time_completion = end-start
@@ -69,14 +58,18 @@ class WhisperCallManager2(CallManager):
             except sr.RequestError as e:
                 result = f"Could not request results from Whisper; {e}"
             print("[WCM2] Customer: ", result)
-            if energy > self.customer_recognizer.energy_threshold:
-                self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+            self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+
+        def callback_customer(recognizer, audio):
+            self.callback_customer_thread = threading.Thread(target=callback_customer_handler, args=[recognizer, audio])
+            self.callback_customer_thread.start()
+            
         self.speech_recognition_callback_customer = callback_customer
 
         self.salesperson_recognizer = sr.Recognizer()
         self.customer_recognizer = sr.Recognizer()
-        self.salesperson_recognizer.dynamic_energy_threshold = False
-        self.customer_recognizer.dynamic_energy_threshold = False
+        #self.salesperson_recognizer.dynamic_energy_threshold = False
+        #self.customer_recognizer.dynamic_energy_threshold = False
 
 
     def start_call(self):
@@ -100,8 +93,8 @@ class WhisperCallManager2(CallManager):
 
         print("finish calibrating devices")
 
-        self.salesperson_recognizer.energy_threshold += 100
-        self.customer_recognizer.energy_threshold += 100
+        #self.salesperson_recognizer.energy_threshold += 100
+        #self.customer_recognizer.energy_threshold += 100
 
         print(f"salesperson energy threshold is{self.salesperson_recognizer.energy_threshold}")
         print(f"customer energy threshold is{self.customer_recognizer.energy_threshold}")
@@ -122,7 +115,7 @@ class WhisperCallManager2(CallManager):
         self.stop_listening_customer(wait_for_stop=False)
         
 
-    def recognize_faster_whisper(self, audio_data, model="medium.en", device="cuda", compute_type ="auto", cpu_threads=0):
+    def recognize_faster_whisper(self, audio_data, model="medium.en", device="cpu", compute_type ="auto", cpu_threads=0):
         assert isinstance(audio_data, sr.AudioData)
         import numpy as np
         import soundfile as sf

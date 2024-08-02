@@ -51,10 +51,14 @@ class Model:
             return "waiting..."
         else:
             return self.emotion[self.emotion.__len__() - 1][0]
+        
+    def get_emotion_timeline(self):
+        return self.emotion
     
     def set_emotion(self, emotion):
-        timestamp = datetime.now()
-        self.emotion.append([emotion, timestamp])
+        if emotion != self.get_emotion():
+            timestamp = datetime.now()
+            self.emotion.append([emotion, timestamp])
         self.__update_view()
 
     def get_personalities(self):

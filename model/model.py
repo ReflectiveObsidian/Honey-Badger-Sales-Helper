@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class Model:
     def __init__(self, view):
         self.view = view
@@ -45,10 +47,14 @@ class Model:
         self.__update_view()
 
     def get_emotion(self):
-        return self.emotion
+        if self.emotion.__len__() == 0:
+            return "waiting..."
+        else:
+            return self.emotion[self.emotion.__len__() - 1][0]
     
     def set_emotion(self, emotion):
-        self.emotion = emotion
+        timestamp = datetime.now()
+        self.emotion.append([emotion, timestamp])
         self.__update_view()
 
     def get_personalities(self):
@@ -102,7 +108,7 @@ class Model:
 
     def initialise(self):
         self.call_logs = []
-        self.emotion = ["waiting..."]
+        self.emotion = []
         self.personalities = ["waiting..."]
         self.warnings = ""
         self.todo_list = "Generating..."

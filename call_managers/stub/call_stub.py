@@ -50,7 +50,12 @@ class CallStub(CallManager):
             else:
                 content = badger_quotes[badger_content_id]
             timestamp = datetime.now()
-            call_log = CallLog(timestamp, speaker, content)
+            new_speaker = ""
+            if speaker == "Mink":
+                new_speaker = "Customer"
+            else:
+                new_speaker = "Salesperson"
+            call_log = CallLog(timestamp, new_speaker, content)
             self.add_call_log_callback(call_log)
 
             if speaker == 'Mink':

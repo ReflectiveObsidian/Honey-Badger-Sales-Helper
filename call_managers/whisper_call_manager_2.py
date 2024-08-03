@@ -20,6 +20,7 @@ class WhisperCallManager2(CallManager):
 
         self.salesperson_data_queue = Queue()
         self.customer_data_queue = Queue()
+        self.unified_queue = Queue()
 
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
@@ -27,7 +28,7 @@ class WhisperCallManager2(CallManager):
             if energy > self.salesperson_recognizer.energy_threshold:
                 print("salesperson energy is: ", energy)
                 print("salesperson energy threshold is ", self.salesperson_recognizer.energy_threshold)
-                self.salesperson_data_queue.put(audio)
+                self.unified_queue.put(["Salesperson", audio])
 
         self.speech_recognition_callback_salesperson = callback_salesperson
 
@@ -37,7 +38,7 @@ class WhisperCallManager2(CallManager):
             if energy > self.customer_recognizer.energy_threshold:
                 print("customer energy is: ", energy)
                 print("customer energy threshold is ", self.customer_recognizer.energy_threshold)
-                self.customer_data_queue.put(audio)
+                self.unified_queue.put(["Customer", audio])
 
         self.speech_recognition_callback_customer = callback_customer
 
@@ -72,6 +73,20 @@ class WhisperCallManager2(CallManager):
                 time_completion = end-start
                 print(f"finish transcribing customer {time_completion}")
                 self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+                sleep(0.1)
+
+    def unified_transcriber(self):
+        while self.call: 
+            if not self.unified_queue.empty():
+                who, audio = self.unified_queue.get()
+                print("Unified Transcribe: ", who)
+                start = datetime.now()
+                result = self.recognize_faster_whisper(audio)
+                #result = self.customer_recognizer.recognize_whisper(audio, language = "english")
+                end = datetime.now()
+                time_completion = end-start
+                print(f"finish transcribing " + who + f" {time_completion}")
+                self.add_call_log_callback(CallLog(datetime.now(), who, result))
                 sleep(0.1)
 
 
@@ -113,11 +128,14 @@ class WhisperCallManager2(CallManager):
         print("starting customer mic")
         self.stop_listening_customer = self.customer_recognizer.listen_in_background(self.customer_microphone, self.speech_recognition_callback_customer)
 
-        salesperson_transcriber_thread = threading.Thread(target=self.salesperson_transcriber, args=(self.salesperson_recognizer,))
-        salesperson_transcriber_thread.start()
-        sleep(0.1)
-        customer_transcriber_thread = threading.Thread(target=self.customer_transcriber, args=(self.customer_recognizer,))
-        customer_transcriber_thread.start()
+        #salesperson_transcriber_thread = threading.Thread(target=self.salesperson_transcriber, args=(self.salesperson_recognizer,))
+        #salesperson_transcriber_thread.start()
+        #sleep(0.1)
+        #customer_transcriber_thread = threading.Thread(target=self.customer_transcriber, args=(self.customer_recognizer,))
+        #customer_transcriber_thread.start()
+
+        unified_transcriber_thread = threading.Thread(target=self.unified_transcriber)
+        unified_transcriber_thread.start()
 
         print("[WCM2] Call started")
 

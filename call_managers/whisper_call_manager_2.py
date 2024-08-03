@@ -46,6 +46,8 @@ class WhisperCallManager2(CallManager):
         self.customer_recognizer = sr.Recognizer()
         self.salesperson_recognizer.dynamic_energy_threshold = False
         self.customer_recognizer.dynamic_energy_threshold = False
+        self.salesperson_recognizer.pause_threshold = 2
+        self.customer_recognizer.pause_threshold = 2
 
     def salesperson_transcriber(self, recognizer):
         while self.call:
@@ -78,16 +80,31 @@ class WhisperCallManager2(CallManager):
     def unified_transcriber(self):
         while self.call: 
             if not self.unified_queue.empty():
-                who, audio = self.unified_queue.get()
-                print("Unified Transcribe: ", who)
+                cust_audio = None
+                sales_audio = None
+                while not self.unified_queue.empty():
+                    who, audio = self.unified_queue.get()
+                    raw_audio = audio.get_raw_data()
+                    print("Unified Transcribe: ", who)
+                    if who == "Customer":
+                        cust_raw_audio = cust_raw_audio + raw_audio
+                    elif who == "Salesperson":
+                        sales_raw_audio = sales_raw_audio + raw_audio
                 start = datetime.now()
-                result = self.recognize_faster_whisper(audio)
+                if cust_raw_audio:
+                    cust_audio = sr.AudioData(cust_raw_audio, audio.sample_rate, audio.sample_width)
+                    result = self.recognize_faster_whisper(cust_audio)
+                    self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+                if sales_raw_audio:
+                    sales_audio = sr.AudioData(sales_raw_audio, audio.sample_rate, audio.sample_width)
+                    result = self.recognize_faster_whisper(sales_audio)
+                    self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
+                #result = self.recognize_faster_whisper(audio)
                 #result = self.customer_recognizer.recognize_whisper(audio, language = "english")
                 end = datetime.now()
                 time_completion = end-start
-                print(f"finish transcribing " + who + f" {time_completion}")
-                self.add_call_log_callback(CallLog(datetime.now(), who, result))
-                sleep(0.1)
+                print(f"unified transcribe {time_completion}")
+                #self.add_call_log_callback(CallLog(datetime.now(), who, result))
 
 
     def start_call(self):

@@ -24,7 +24,7 @@ class Text2EmotionChatProcessor(ChatProcessor):
         # Get the emotion with the highest score
         emotion = max(emotions[0], key=lambda x: x['score'])
         # Call the model callback with the emotion
-        self.model_callback([emotion['label']])
+        self.model_callback(emotion['label'])
 
     def get_callback(self):
         return lambda chat_logs: self.process_chat(chat_logs)

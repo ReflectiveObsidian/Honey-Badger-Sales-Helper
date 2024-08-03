@@ -146,7 +146,7 @@ class WhisperCallManager2(CallManager):
         self.stop_listening_customer(wait_for_stop=False)
         
 
-    def recognize_faster_whisper(self, audio_data, model="large-v3", device="gpu", compute_type ="auto", cpu_threads=0):
+    def recognize_faster_whisper(self, audio_data, model="large-v3", device="cpu", compute_type ="auto", cpu_threads=8):
         assert isinstance(audio_data, sr.AudioData)
         import numpy as np
         import soundfile as sf

@@ -18,8 +18,8 @@ class WhisperCallManager2(CallManager):
         self.salesperson_device_id_callback = salesperson_device_id_callback
         self.customer_device_id_callback = customer_device_id_callback
 
-        salesperson_data_queue = Queue()
-        customer_data_queue = Queue()
+        self.salesperson_data_queue = Queue()
+        self.customer_data_queue = Queue()
 
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
@@ -27,7 +27,7 @@ class WhisperCallManager2(CallManager):
             if energy > self.salesperson_recognizer.energy_threshold:
                 print("salesperson energy is: ", energy)
                 print("salesperson energy threshold is ", self.salesperson_recognizer.energy_threshold)
-                salesperson_data_queue.put(audio)
+                self.salesperson_data_queue.put(audio)
 
         self.speech_recognition_callback_salesperson = callback_salesperson
 
@@ -37,7 +37,7 @@ class WhisperCallManager2(CallManager):
             if energy > self.customer_recognizer.energy_threshold:
                 print("customer energy is: ", energy)
                 print("customer energy threshold is ", self.customer_recognizer.energy_threshold)
-                customer_data_queue.put(audio)
+                self.customer_data_queue.put(audio)
 
         self.speech_recognition_callback_customer = callback_customer
 
@@ -47,28 +47,32 @@ class WhisperCallManager2(CallManager):
         self.customer_recognizer.dynamic_energy_threshold = False
 
     def salesperson_transcriber(self, recognizer):
-        while self.call: 
-            audio = self.salesperson_data_queue.get()
-            print("transcribing salesperson")
-            start = datetime.now()
-            result = self.recognize_faster_whisper(audio)
-            end = datetime.now()
-            time_completion = end-start
-            print(f"finish transcribing salesperson {time_completion}")
-            self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
-            sleep(0.1)
+        while self.call:
+            if not self.salesperson_data_queue.empty(): 
+                audio = self.salesperson_data_queue.get()
+                print("transcribing salesperson")
+                start = datetime.now()
+                result = self.recognize_faster_whisper(audio)
+                #result = self.salesperson_recognizer.recognize_whisper(audio, language = "english")
+                end = datetime.now()
+                time_completion = end-start
+                print(f"finish transcribing salesperson {time_completion}")
+                self.add_call_log_callback(CallLog(datetime.now(), "Salesperson", result))
+                sleep(0.1)
 
     def customer_transcriber(self, recognizer):
         while self.call: 
-            audio = self.customer_data_queue.get()
-            print("transcribing customer")
-            start = datetime.now()
-            result = self.recognize_faster_whisper(audio)
-            end = datetime.now()
-            time_completion = end-start
-            print(f"finish transcribing customer {time_completion}")
-            self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
-            sleep(0.1)
+            if not self.customer_data_queue.empty():
+                audio = self.customer_data_queue.get()
+                print("transcribing customer")
+                start = datetime.now()
+                result = self.recognize_faster_whisper(audio)
+                #result = self.customer_recognizer.recognize_whisper(audio, language = "english")
+                end = datetime.now()
+                time_completion = end-start
+                print(f"finish transcribing customer {time_completion}")
+                self.add_call_log_callback(CallLog(datetime.now(), "Customer", result))
+                sleep(0.1)
 
 
     def start_call(self):
@@ -124,7 +128,7 @@ class WhisperCallManager2(CallManager):
         self.stop_listening_customer(wait_for_stop=False)
         
 
-    def recognize_faster_whisper(self, audio_data, model="medium.en", device="cuda", compute_type ="auto", cpu_threads=0):
+    def recognize_faster_whisper(self, audio_data, model="medium.en", device="cpu", compute_type ="auto", cpu_threads=0):
         assert isinstance(audio_data, sr.AudioData)
         import numpy as np
         import soundfile as sf

@@ -80,15 +80,20 @@ class WhisperCallManager2(CallManager):
     def unified_transcriber(self):
         while self.call: 
             if not self.unified_queue.empty():
-                cust_audio = None
-                sales_audio = None
+                cust_raw_audio = None
+                sales_raw_audio = None
                 while not self.unified_queue.empty():
                     who, audio = self.unified_queue.get()
                     raw_audio = audio.get_raw_data()
                     print("Unified Transcribe: ", who)
                     if who == "Customer":
-                        cust_raw_audio = cust_raw_audio + raw_audio
+                        if cust_raw_audio == None:
+                            cust_raw_audio = raw_audio
+                        else:
+                            cust_raw_audio = cust_raw_audio + raw_audio
                     elif who == "Salesperson":
+                        if sales_raw_audio == None:
+                            sales_raw_audio = raw_audio
                         sales_raw_audio = sales_raw_audio + raw_audio
                 start = datetime.now()
                 if cust_raw_audio:

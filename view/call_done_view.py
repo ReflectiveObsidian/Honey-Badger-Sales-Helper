@@ -1,7 +1,17 @@
-import tkinter as tk
+import pandas as pd
+import random
+from datetime import datetime
 
+import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import ttk
+
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.dates import DateFormatter
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from view.colours import Colours
 
@@ -19,6 +29,24 @@ class CallDoneView:
         self.frame.master.grid_forget()
         
         tk.Label(self.frame.master, text='End-of-call summary', font=("Helvetica", 16), bg=Colours.THEMED_BACKGROUND).grid(padx=10, pady=10)
+
+        # Solution adapted from https://stackoverflow.com/questions/76375015/how-to-create-a-timeline-chart
+
+        emotion_data = pd.DataFrame({
+            "start": [pd.Timestamp("2021-01-01 09:00:00")],
+            "end": [pd.Timestamp("2021-01-01 09:00:05")],
+            "y": [0],
+            "duration": [0.15],
+            "status": ["None"],
+        })
+        emotion_legend = {"None": "#ff0000"}
+        self.emotion_graph_figure, self.emotion_ax = plt.subplots(figsize=(10, 2))
+        self.emotion_graph_figure.set_facecolor(Colours.THEMED_BACKGROUND)
+        self.emotion_ax.set_facecolor(Colours.THEMED_BACKGROUND)
+        emotion_graph_figure = self.update_emotion_timeline(emotion_data, emotion_legend, self.emotion_graph_figure, self.emotion_ax)
+        self.emotion_graph = FigureCanvasTkAgg(emotion_graph_figure, master=self.frame.master)
+        self.emotion_graph.draw()
+        self.emotion_graph.get_tk_widget().grid(padx=10, pady=10, sticky="ew")
 
         self.call_logs = scrolledtext.ScrolledText(self.frame.master, bg=Colours.NEUTRAL_BACKGROUND, height = 15)
         self.call_logs.grid(padx=10, pady=10, sticky="ew")
@@ -62,5 +90,49 @@ class CallDoneView:
         self.summary.delete('1.0', tk.END)
         self.summary.insert('insert', model.get_summary())
 
+    def draw_emotion_timeline(self, model):
+        emotion_model_data = model.get_emotion_timeline()
+        #print("Emotion Model Data: " + str(emotion_model_data))
+        emotion_data = pd.DataFrame(emotion_model_data, columns=["status", "timestamp"])
+        emotion_data["start"] = pd.to_datetime(emotion_data["timestamp"])
+        emotion_data["end"] = pd.to_datetime(emotion_data["timestamp"]).shift(-1).fillna(pd.to_datetime(datetime.now()))
+        emotion_data["y"] = 0.5
+        emotion_data["duration"] = emotion_data["end"] - emotion_data["start"]
+        emotion_legend = {emotion: f"#{random.randint(0, 0xFFFFFF):06x}" for emotion in emotion_data["status"].unique()}
+        self.update_emotion_timeline(emotion_data, emotion_legend, self.emotion_graph_figure, self.emotion_ax)
+        self.emotion_graph.draw()
+
     def formatted_call_logs(self, call_logs):
         return "\n\n".join([str(call_log) for call_log in call_logs])
+    
+    def update_emotion_timeline(self, df, d, emotion_graph_figure, ax):
+        if df.empty:
+            print("No emotions to render yet, skipping")
+            return
+
+        ax.set_ylim(0, 1)
+        ax.set_yticklabels([])
+        ax.yaxis.set_ticks_position("none")
+
+        ax.set_xticks(df[["start", "end"]].stack().unique())
+        ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
+        ax.set_xlim(df["start"].min(), df["end"].max())
+        for label in ax.get_xticklabels():
+            label.set_weight("bold")
+            label.set_fontname("serif")
+
+        for s, c in d.items():
+            tmp = df[df["status"] == s]
+            ax.barh(tmp["y"], tmp["duration"], left=tmp["start"], height=0.2, color=d[s])
+
+        rects = [plt.Rectangle((0, 0), 0, 0, color=c) for c in d.values()]
+
+        ax.legend(
+            rects, d.keys(), ncol=len(d.keys()), bbox_to_anchor=(0.463, 1.25),
+            frameon=False, handleheight=2, handlelength=3, handletextpad=0.5,
+            prop={"weight": "bold", "family": "serif"},
+        )
+
+        return self.emotion_graph_figure
+    
+

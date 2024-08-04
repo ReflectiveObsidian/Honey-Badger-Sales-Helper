@@ -113,7 +113,7 @@ class Model:
     def initialise(self):
         self.call_logs = []
         self.emotion = []
-        self.personalities = ["waiting..."]
+        self.personalities = None
         self.warnings = ""
         self.todo_list = "Generating..."
         self.summary = "Generating..."

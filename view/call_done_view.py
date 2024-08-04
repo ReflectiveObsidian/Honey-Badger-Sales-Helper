@@ -27,20 +27,24 @@ class CallDoneView:
             "Main Frame",
             widgetkwargs={"style": "Themed.TFrame"})
         self.frame.master.grid_forget()
+        self.customer_personality = None
         
         tk.Label(self.frame.master, text='End-of-call summary', font=("Helvetica", 16), bg=Colours.THEMED_BACKGROUND).grid(padx=10, pady=10)
+
+        self.emotion_graph_title = tk.Label(self.frame.master, text="Emotion Timeline", font=("Helvetica", 12), bg=Colours.THEMED_BACKGROUND)
+        self.emotion_graph_title.grid(padx=10, pady=10)
 
         # Solution adapted from https://stackoverflow.com/questions/76375015/how-to-create-a-timeline-chart
 
         emotion_data = pd.DataFrame({
             "start": [pd.Timestamp("2021-01-01 09:00:00")],
             "end": [pd.Timestamp("2021-01-01 09:00:05")],
-            "y": [0],
+            "y": [0.5],
             "duration": [0.15],
             "status": ["None"],
         })
         emotion_legend = {"None": "#ff0000"}
-        self.emotion_graph_figure, self.emotion_ax = plt.subplots(figsize=(10, 2))
+        self.emotion_graph_figure, self.emotion_ax = plt.subplots(figsize=(7, 2))
         self.emotion_graph_figure.set_facecolor(Colours.THEMED_BACKGROUND)
         self.emotion_ax.set_facecolor(Colours.THEMED_BACKGROUND)
         emotion_graph_figure = self.update_emotion_timeline(emotion_data, emotion_legend, self.emotion_graph_figure, self.emotion_ax)
@@ -90,9 +94,22 @@ class CallDoneView:
         self.summary.delete('1.0', tk.END)
         self.summary.insert('insert', model.get_summary())
 
+        if model.get_personalities():
+            self.customer_personality = model.get_personalities()[0]
+        else:
+            self.customer_personality = None
+
+        emotion_graph_title_text = None
+        if self.customer_personality is not None:
+            emotion_graph_title_text = f"Emotion Timeline of Customer with Personality {self.customer_personality}"
+        else:
+            emotion_graph_title_text = "Emotion Timeline of Customer"
+        self.emotion_graph_title.config(text=emotion_graph_title_text)
+        
+
     def draw_emotion_timeline(self, model):
         emotion_model_data = model.get_emotion_timeline()
-        #print("Emotion Model Data: " + str(emotion_model_data))
+        print("Emotion Model Data: " + str(emotion_model_data))
         emotion_data = pd.DataFrame(emotion_model_data, columns=["status", "timestamp"])
         emotion_data["start"] = pd.to_datetime(emotion_data["timestamp"])
         emotion_data["end"] = pd.to_datetime(emotion_data["timestamp"]).shift(-1).fillna(pd.to_datetime(datetime.now()))
@@ -110,7 +127,7 @@ class CallDoneView:
             print("No emotions to render yet, skipping")
             return
 
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0.25, 0.75)
         ax.set_yticklabels([])
         ax.yaxis.set_ticks_position("none")
 
@@ -128,7 +145,7 @@ class CallDoneView:
         rects = [plt.Rectangle((0, 0), 0, 0, color=c) for c in d.values()]
 
         ax.legend(
-            rects, d.keys(), ncol=len(d.keys()), bbox_to_anchor=(0.463, 1.25),
+            rects, d.keys(), ncol=len(d.keys()), #bbox_to_anchor=(0.463, 1.25),
             frameon=False, handleheight=2, handlelength=3, handletextpad=0.5,
             prop={"weight": "bold", "family": "serif"},
         )

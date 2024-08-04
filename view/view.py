@@ -171,7 +171,11 @@ class View:
         self.salesperson_device_entry.current(model.get_salesperson_sound_device_id())
         self.customer_device_entry.current(model.get_customer_sound_device_id())
         emotion = model.get_emotion()
-        personalities = model.get_personalities()[0]
+        personalities = None
+        if model.get_personalities():
+            personalities = model.get_personalities()[0]
+        else:
+            personalities = "waiting..."
         self.recommendation.config(text=get_recommendation(emotion, personalities))
         self.call_done_view.update(model)
 

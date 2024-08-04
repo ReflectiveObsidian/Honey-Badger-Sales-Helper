@@ -79,6 +79,7 @@ class Controller(TKMT.ThemedTKinterFrame):
         if self.call_manager is not None:
             self.call_manager.end_call()
         self.generate_end_call_items()
+        self.view.call_done_view.draw_emotion_timeline(self.model)
         
 
     def generate_end_call_items(self):

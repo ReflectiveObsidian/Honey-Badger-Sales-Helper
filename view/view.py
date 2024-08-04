@@ -165,13 +165,17 @@ class View:
         self.call_logs.delete('1.0', tk.END)
         self.call_logs.insert('insert', self.formatted_call_logs(model.get_call_logs()))
         self.call_logs.see("end")
-        self.emotion.config(text=model.get_emotion()[0])
+        self.emotion.config(text=model.get_emotion())
         self.personalities.config(text=model.get_personalities())
         self.warnings.config(text=model.get_warnings())
         self.salesperson_device_entry.current(model.get_salesperson_sound_device_id())
         self.customer_device_entry.current(model.get_customer_sound_device_id())
-        emotion = model.get_emotion()[0]
-        personalities = model.get_personalities()[0]
+        emotion = model.get_emotion()
+        personalities = None
+        if model.get_personalities():
+            personalities = model.get_personalities()[0]
+        else:
+            personalities = "waiting..."
         self.recommendation.config(text=get_recommendation(emotion, personalities))
         self.call_done_view.update(model)
 

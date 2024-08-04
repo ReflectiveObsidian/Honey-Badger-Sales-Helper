@@ -10,3 +10,4 @@ transformers
 torch
 soundfile
 TKinterModernThemes
+matplotlib==3.9.1

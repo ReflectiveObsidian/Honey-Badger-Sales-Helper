@@ -22,6 +22,8 @@ class WhisperCallManager2(CallManager):
         self.customer_data_queue = Queue()
         self.unified_queue = Queue()
 
+        self.file_count = 1
+
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
             energy = audioop.rms(raw_data, audio.sample_width)

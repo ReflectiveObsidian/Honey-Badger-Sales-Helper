@@ -22,6 +22,8 @@ class WhisperCallManager2(CallManager):
         self.customer_data_queue = Queue()
         self.unified_queue = Queue()
 
+        self.file_count = 1
+
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
             energy = audioop.rms(raw_data, audio.sample_width)
@@ -81,6 +83,12 @@ class WhisperCallManager2(CallManager):
                 who, audio = self.unified_queue.get()
                 print("Unified Transcribe: ", who)
                 start = datetime.now()
+
+                wav_data = audio.get_wav_data(convert_rate=16000)
+                with open(f"audio_files/{who}_audio_{self.file_count}.wav", "wb") as f:
+                    f.write(wav_data)
+                self.file_count += 1
+
                 result = self.recognize_faster_whisper(audio)
                 #result = self.customer_recognizer.recognize_whisper(audio, language = "english")
                 end = datetime.now()

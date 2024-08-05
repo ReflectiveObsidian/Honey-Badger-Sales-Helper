@@ -1,5 +1,6 @@
 import tkinter as tk
 import TKinterModernThemes as TKMT
+from PIL import ImageTk, Image
 
 from tkinter import PhotoImage
 from tkinter import scrolledtext
@@ -30,9 +31,20 @@ class View:
         self.frame = self.controller.addFrame(
             "Main Frame",
             widgetkwargs={"style": "Themed.TFrame"})
+        
+        logo = Image.open("images\\HoneyBadgerIcon.png")
+        logo = logo.resize((50, 50))
+        logo = ImageTk.PhotoImage(logo)
+        
+        self.title_logo_frame = ttk.Frame(self.frame.master, style="Themed.TFrame")
+        self.title_logo_frame.grid(padx=0, pady=0)
 
-        self.title = ttk.Label(self.frame.master, text='Call Dashboard', style="Themed.TLabel", font=(16))
-        self.title.grid(padx=10, pady=10)
+        self.logo = ttk.Label(self.title_logo_frame, image=logo, style="Themed.TLabel")
+        self.logo.image = logo
+        self.logo.grid(row=0, column=0, padx=10, pady=10)
+
+        self.title = ttk.Label(self.title_logo_frame, text='Call Dashboard', style="Themed.TLabel", font=(16))
+        self.title.grid(row=0, column=1, padx=10, pady=10)
 
         self.call_logs_frame = ttk.Frame(self.frame.master, style="Themed.TFrame")
         self.call_logs_frame.grid(padx=10, pady=10, sticky="ew")

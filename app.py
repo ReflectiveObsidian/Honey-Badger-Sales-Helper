@@ -1,4 +1,4 @@
-CALL_MANAGER_DEMO_MODE = False
+CALL_MANAGER_DEMO_MODE = True
 
 import queue
 import threading
@@ -6,6 +6,7 @@ import TKinterModernThemes as TKMT
 from urllib.parse import quote
 import webbrowser
 from time import sleep
+from datetime import datetime
 
 from llm_chat_processors.prompt_type import PromptType
 from model.model import Model
@@ -121,12 +122,24 @@ class Controller(TKMT.ThemedTKinterFrame):
         customer_id = self.model.get_customer_id()
         customer_phone = self.model.get_customer_phone()
         salesperson_id = self.model.get_salesperson_id()
+
+        customer_personality = "Not Available" if self.model.get_personalities() is None else self.model.get_personalities()[0]
+        customer_emotion = "Not Available" if self.model.get_emotion() is None else self.generate_emotion_timeline()
+
         todo = self.model.get_todo_list()
         summary = self.model.get_summary()
 
-        summary = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\n\nSummary: \n{summary}\n\nTodo: \n{todo}\n"
+        summary = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\n\nCustomer Personality: {customer_personality}\nEmotion Timeline: {customer_emotion}\n\nSummary: \n{summary}\n\nTodo: \n{todo}\n"
 
         return summary
+    
+    def generate_emotion_timeline(self):
+        string = ""
+        emotions = self.model.get_emotion_timeline()
+        for emotion in emotions:
+            formatted_dt = emotion[1].strftime("%d-%m-%y %H:%M")
+            string += f"{formatted_dt}: {emotion[0]}\n"
+        return string
 
 
     def handle_salesperson_device_selected(self, device_id):

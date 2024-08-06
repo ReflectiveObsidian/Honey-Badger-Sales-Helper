@@ -16,8 +16,8 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         model_path = "llm_chat_processors/llm_models/Phi-3-mini-4k-instruct-q4.gguf"
         model_kwargs = {
                 "n_ctx":4096,    # Context length to use
-                "n_threads":4,   # Number of CPU threads to use
-                "n_gpu_layers": 33, # Number of model layers to offload to GPU. Set to 0 if only using CPU
+                "n_threads":5,   # Number of CPU threads to use
+                "n_gpu_layers": 0, # Number of model layers to offload to GPU. Set to 0 if only using CPU
         }
         self.llm = Llama(model_path = model_path, **model_kwargs)
         self.mode = 3

@@ -5,6 +5,7 @@ import threading
 import TKinterModernThemes as TKMT
 from urllib.parse import quote
 import webbrowser
+from time import sleep
 
 from llm_chat_processors.prompt_type import PromptType
 from model.model import Model
@@ -80,10 +81,16 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.llm_chat_processor.set_prompt(PromptType.WARNINGS, self.model.get_call_logs(), lambda todo: self.model.set_warnings(todo), True)
 
     def handle_end_call(self):
+        threading.Thread(target=self.end_call_and_change_view).start()
+
+    def end_call_and_change_view(self):
         if self.call_manager is not None:
             self.call_manager.end_call()
         self.generate_end_call_items()
         self.view.call_done_view.draw_emotion_timeline(self.model)
+        while self.model.get_call_state() != CallManagerState.IDLE:
+            sleep(0.1)
+        self.view.go_to_call_done_view()
 
     def handle_call_manager_state(self, state:CallManagerState):
         self.model.set_call_state(state)

@@ -6,8 +6,8 @@ import audioop
 import speech_recognition as sr
 from queue import Queue
 import threading
-from call_managers.call_manager_state import CallManagerState
 
+from call_managers.call_manager_state import CallManagerState
 from call_managers.call_manager import CallManager
 from model.call_log import CallLog
 
@@ -25,15 +25,14 @@ class WhisperCallManager2(CallManager):
 
         self.salesperson_data_queue = Queue()
         self.customer_data_queue = Queue()
-        self.unified_queue = Queue()
-
+        
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
             energy = audioop.rms(raw_data, audio.sample_width)
             if energy > self.salesperson_recognizer.energy_threshold:
                 print("salesperson energy is: ", energy)
                 print("salesperson energy threshold is ", self.salesperson_recognizer.energy_threshold)
-                self.unified_queue.put(["Salesperson", audio])
+                self.salesperson_data_queue.put([datetime.now(), audio])
 
         self.speech_recognition_callback_salesperson = callback_salesperson
 
@@ -43,7 +42,7 @@ class WhisperCallManager2(CallManager):
             if energy > self.customer_recognizer.energy_threshold:
                 print("customer energy is: ", energy)
                 print("customer energy threshold is ", self.customer_recognizer.energy_threshold)
-                self.unified_queue.put(["Customer", audio])
+                self.customer_data_queue.put([datetime.now(), audio])
 
         self.speech_recognition_callback_customer = callback_customer
 
@@ -82,24 +81,65 @@ class WhisperCallManager2(CallManager):
 
     def unified_transcriber(self):
         while self.call: 
-            if not self.unified_queue.empty():
-                who, audio = self.unified_queue.get()
-                print("Unified Transcribe: ", who)
-                start = datetime.now()
-
-                wav_data = audio.get_wav_data(convert_rate=16000)
-                with open(f"audio_files/{who}_audio_{self.file_count}.wav", "wb") as f:
-                    f.write(wav_data)
-                self.file_count += 1
-
-                result = self.recognize_faster_whisper(audio)
-                #result = self.customer_recognizer.recognize_whisper(audio, language = "english")
-                end = datetime.now()
-                time_completion = end-start
-                print(f"finish transcribing " + who + f" {time_completion}")
-                self.add_call_log_callback(CallLog(datetime.now(), who, result))
+            priority = self.determine_priority()
+            who = None
+            raw_audio = None
+            count = None
+            sample_rate = None
+            sample_width = None
+            if priority == "Salesperson":
+                who = "Salesperson"
+                count = self.salesperson_data_queue.qsize()
+                time, audio = self.salesperson_data_queue.get()
+                raw_audio = audio.get_raw_data()
+                sample_rate = audio.sample_rate
+                sample_width = audio.sample_width
+                while self.salesperson_data_queue.qsize() > 0:
+                    time, audio = self.salesperson_data_queue.get()
+                    raw_audio += audio.get_raw_data()
+            elif priority == "Customer":
+                who = "Customer"
+                count = self.customer_data_queue.qsize()
+                time, audio = self.customer_data_queue.get()
+                raw_audio = audio.get_raw_data()
+                sample_rate = audio.sample_rate
+                sample_width = audio.sample_width
+                while self.customer_data_queue.qsize() > 0:
+                    time, audio = self.customer_data_queue.get()
+                    raw_audio += audio.get_raw_data()
+            else:
                 sleep(0.1)
+                continue
+            batched_audio = sr.AudioData(raw_audio, sample_rate, sample_width)
+            print("Unified Transcribe: ", who, " has ", count, " in queue, transcribing...")
+            start = datetime.now()
 
+            wav_data = batched_audio.get_wav_data(convert_rate=16000)
+            with open(f"audio_files/{who}_audio_{self.file_count}.wav", "wb") as f:
+                f.write(wav_data)
+            self.file_count += 1
+
+            result = self.recognize_faster_whisper(batched_audio)
+            #result = self.customer_recognizer.recognize_whisper(batched_audio, language = "english")
+            end = datetime.now()
+            time_completion = end-start
+            print(f"finish transcribing " + who + f" {time_completion}")
+            self.add_call_log_callback(CallLog(datetime.now(), who, result))
+
+    def determine_priority(self):
+        if self.salesperson_data_queue.empty() and not self.customer_data_queue.empty():
+            return "Customer"
+        elif not self.salesperson_data_queue.empty() and self.customer_data_queue.empty():
+            return "Salesperson"
+        elif not self.salesperson_data_queue.empty() and not self.customer_data_queue.empty():
+            cust_time, cust_audio = self.customer_data_queue.queue[0]
+            sales_time, sales_audio = self.salesperson_data_queue.queue[0]
+            if cust_time < sales_time:
+                return "Customer"
+            else:
+                return "Salesperson"
+        else:
+            return None
 
     def start_call(self):
         self.state = self.set_state(CallManagerState.STARTING_CALL)
@@ -164,10 +204,13 @@ class WhisperCallManager2(CallManager):
         sleep(1)
         self.stop_listening_customer(wait_for_stop=False)
 
+        while not self.salesperson_data_queue.empty() or not self.customer_data_queue.empty():
+            sleep(0.1)
+
         self.state = self.set_state(CallManagerState.IDLE)
         
 
-    def recognize_faster_whisper(self, audio_data, model="large-v3", device="cpu", compute_type ="auto", cpu_threads=8):
+    def recognize_faster_whisper(self, audio_data, model="large-v3", device="cuda", compute_type ="auto", cpu_threads=8):
         assert isinstance(audio_data, sr.AudioData)
         import numpy as np
         import soundfile as sf

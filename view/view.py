@@ -173,7 +173,6 @@ class View:
         
     def handle_end_call(self):
         self.start_button.config(state="normal")
-        self.go_to_call_done_view()
         self.controller.handle_end_call()
         self.salesperson_device_entry.config(state="normal")
         self.customer_device_entry.config(state="normal")

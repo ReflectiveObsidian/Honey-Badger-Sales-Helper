@@ -14,6 +14,7 @@ from llm_chat_processors.stub.llm_chat_processor_stub import LLMChatProcessorStu
 from llm_chat_processors.non_finetuned_llm_chat_processor import NonFinetunedLLMChatProcessor
 
 # Call Managers
+from call_managers.call_manager_state import CallManagerState
 from call_managers.stub.call_stub import CallStub
 from call_managers.whisper_call_manager import WhisperCallManager
 from call_managers.whisper_call_manager_2 import WhisperCallManager2
@@ -53,10 +54,6 @@ class Controller(TKMT.ThemedTKinterFrame):
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback) # To Replace'''
-        ''' self.call_manager = WhisperCallManager(
-            lambda call_log: self.model.add_call_log(call_log),
-            salesperson_device_id_callback,
-            customer_device_id_callback)'''
         self.call_manager = WhisperCallManager2(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
@@ -70,7 +67,7 @@ class Controller(TKMT.ThemedTKinterFrame):
         self.model.initialise()
 
         #self.call_manager.start_call()
-        self.call_manager_thread = threading.Thread(target=self.call_manager.start_call)
+        self.call_manager_thread = threading.Thread(target=self.call_manager.start_call, args=[self.handle_call_manager_state])
         self.call_manager_thread.start()
 
         self.llm_chat_processor.set_prompt(PromptType.WARNINGS, self.model.get_call_logs(), lambda todo: self.model.set_warnings(todo), True)
@@ -80,7 +77,9 @@ class Controller(TKMT.ThemedTKinterFrame):
             self.call_manager.end_call()
         self.generate_end_call_items()
         self.view.call_done_view.draw_emotion_timeline(self.model)
-        
+
+    def handle_call_manager_state(self, state:CallManagerState):
+        self.model.set_call_state(state)
 
     def generate_end_call_items(self):
         print("calling summary generation")

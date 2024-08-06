@@ -6,6 +6,7 @@ import audioop
 import speech_recognition as sr
 from queue import Queue
 import threading
+from call_managers.call_manager_state import CallManagerState
 
 from call_managers.call_manager import CallManager
 from model.call_log import CallLog
@@ -17,6 +18,7 @@ class WhisperCallManager2(CallManager):
         self.add_call_log_callback = add_call_log_callback
         self.salesperson_device_id_callback = salesperson_device_id_callback
         self.customer_device_id_callback = customer_device_id_callback
+        self.state = CallManagerState.IDLE
 
         self.salesperson_data_queue = Queue()
         self.customer_data_queue = Queue()
@@ -98,8 +100,10 @@ class WhisperCallManager2(CallManager):
                 sleep(0.1)
 
 
-    def start_call(self):
+    def start_call(self, call_state_callback):
+        self.call_state_callback = call_state_callback
 
+        self.state = self.set_state(CallManagerState.STARTING_CALL)
         self.call = True
 
         print("[WCM2] call start fn")
@@ -111,6 +115,8 @@ class WhisperCallManager2(CallManager):
         device_index_customer = self.customer_device_id_callback()
         self.customer_microphone = sr.Microphone(device_index= device_index_customer)
         print("[WCM2] customer device index: ", device_index_customer)
+
+        self.state = self.set_state(CallManagerState.CALIBRATING)
         
         print("calibrating devices... please do not speak during this time")
         print("[WCM2] 1")
@@ -121,6 +127,8 @@ class WhisperCallManager2(CallManager):
             self.customer_recognizer.adjust_for_ambient_noise(source, duration = 3)
 
         print("finish calibrating devices")
+
+        self.state = self.set_state(CallManagerState.STARTING_CALL)
 
         self.salesperson_recognizer.energy_threshold += 100
         self.customer_recognizer.energy_threshold += 100
@@ -147,11 +155,17 @@ class WhisperCallManager2(CallManager):
 
         print("[WCM2] Call started")
 
+        self.state = self.set_state(CallManagerState.ON_CALL)
+
 
     def end_call(self):
+        self.state = self.set_state(CallManagerState.ENDING_CALL)
+
         self.stop_listening_salesperson(wait_for_stop=False)
         sleep(1)
         self.stop_listening_customer(wait_for_stop=False)
+
+        self.state = self.set_state(CallManagerState.IDLE)
         
 
     def recognize_faster_whisper(self, audio_data, model="large-v3", device="cpu", compute_type ="auto", cpu_threads=8):
@@ -178,3 +192,10 @@ class WhisperCallManager2(CallManager):
             text += segment.text
 
         return text
+    
+    def get_state(self):
+        return self.state
+    
+    def set_state(self, state):
+        self.state = state
+        self.call_state_callback(self.state)

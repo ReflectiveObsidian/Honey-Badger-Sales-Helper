@@ -1,4 +1,5 @@
 from datetime import datetime
+from call_managers.call_manager_state import CallManagerState
 
 class Model:
     def __init__(self, view):
@@ -9,6 +10,7 @@ class Model:
         self.customer_id = ""
         self.salesperson_id = ""
         self.customer_phone = ""
+        self.call_state = None
 
         self.initialise()
 
@@ -109,6 +111,13 @@ class Model:
 
     def get_customer_phone(self):
         return self.customer_phone
+    
+    def set_call_state(self, call_state:CallManagerState):
+        self.call_state = call_state
+        self.__update_view()
+
+    def get_call_state(self):
+        return self.call_state
 
     def initialise(self):
         self.call_logs = []

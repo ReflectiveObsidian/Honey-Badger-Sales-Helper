@@ -6,6 +6,7 @@ from tkinter import PhotoImage
 from tkinter import scrolledtext
 from tkinter import ttk
 
+from call_managers.call_manager_state import CallManagerState
 
 import utilities.microphone_list as microphone_list
 from utilities.recommendations import get_recommendation
@@ -27,6 +28,7 @@ class View:
         self.style.configure("Themed.TFrame", background=Colours.THEMED_BACKGROUND)
         self.style.configure("Neutral.TFrame", background=Colours.NEUTRAL_BACKGROUND)
         self.style.configure("Themed.TLabel", background=Colours.THEMED_BACKGROUND)
+        self.style.configure("Neutral.TLabel", background=Colours.NEUTRAL_BACKGROUND)
 
         self.frame = self.controller.addFrame(
             "Main Frame",
@@ -94,7 +96,7 @@ class View:
         self.device_frame = tk.Frame(self.call_management_frame, bg=Colours.NEUTRAL_BACKGROUND)
         self.device_frame.grid(row = 0, column = 0, padx=10, pady=10)
 
-        self.salesperson_device_label = tk.Label(self.device_frame, text="Salesperson Source:", bg=Colours.NEUTRAL_HIGHLIGHT)
+        self.salesperson_device_label = tk.Label(self.device_frame, text="Salesperson Source:", bg=Colours.NEUTRAL_BACKGROUND)
         self.salesperson_device_label.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
         options = microphone_list.get_microphone_list()
@@ -102,7 +104,7 @@ class View:
         self.salesperson_device_entry.grid(row=1, column=1, padx=10, pady=10)
         self.salesperson_device_entry.bind("<<ComboboxSelected>>", self.handle_salesperson_device_selected)
 
-        self.customer_device_label = tk.Label(self.device_frame, text="Customer Source:", bg=Colours.NEUTRAL_HIGHLIGHT)
+        self.customer_device_label = tk.Label(self.device_frame, text="Customer Source:", bg=Colours.NEUTRAL_BACKGROUND)
         self.customer_device_label.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
         self.customer_device_entry = ttk.Combobox(self.device_frame, values=options, width=35)
@@ -132,11 +134,14 @@ class View:
         self.button_frame = tk.Frame(self.call_management_frame, bg=Colours.NEUTRAL_BACKGROUND)
         self.button_frame.grid(row = 0, column = 1, padx=10, pady=10)
 
+        self.call_status = ttk.Label(self.button_frame, text="Ready to begin call", style="Neutral.TLabel")
+        self.call_status.grid(row=0, column=0, padx=10, pady=10)
+
         self.start_button = ttk.Button(self.button_frame, text="Start New Call", command=self.handle_start_call)
-        self.start_button.grid(row=0, column=0, padx=10, pady=10)
+        self.start_button.grid(row=1, column=0, padx=10, pady=10)
 
         self.end_button = ttk.Button(self.button_frame, text="End Call and show To-Do", state="disabled", command=self.handle_end_call)
-        self.end_button.grid(row=1, column=0, padx=10, pady=10)
+        self.end_button.grid(row=2, column=0, padx=10, pady=10)
 
     def handle_customer_id(self, _var, _indx, _mode):
         self.controller.handle_customer_id(self.customer_name_text.get())
@@ -189,6 +194,20 @@ class View:
         else:
             personalities = "waiting..."
         self.recommendation.config(text=get_recommendation(emotion, personalities))
+
+        call_status = model.get_call_state()
+        if call_status is not None:
+            if call_status == CallManagerState.IDLE:
+                self.call_status.config(text="Ready to begin call")
+            elif call_status == CallManagerState.STARTING_CALL:
+                self.call_status.config(text="Starting call")
+            elif call_status == CallManagerState.CALIBRATING:
+                self.call_status.config(text="Calibrating, please be quiet")
+            elif call_status == CallManagerState.ON_CALL:
+                self.call_status.config(text="On call")
+            elif call_status == CallManagerState.ENDING_CALL:
+                self.call_status.config(text="Ending call")
+
         self.call_done_view.update(model)
 
     def formatted_call_logs(self, call_logs):

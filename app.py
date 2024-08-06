@@ -1,4 +1,4 @@
-CALL_MANAGER_DEMO_MODE = True
+CALL_MANAGER_DEMO_MODE = False
 
 import queue
 import threading

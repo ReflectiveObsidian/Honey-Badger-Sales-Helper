@@ -1,4 +1,4 @@
-CALL_MANAGER_DEMO_MODE = True
+CALL_MANAGER_DEMO_MODE = False
 
 import queue
 import threading
@@ -129,7 +129,7 @@ class Controller(TKMT.ThemedTKinterFrame):
         todo = self.model.get_todo_list()
         summary = self.model.get_summary()
 
-        summary = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\n\nCustomer Personality: {customer_personality}\nEmotion Timeline: {customer_emotion}\n\nSummary: \n{summary}\n\nTodo: \n{todo}\n"
+        summary = f"Customer ID: {customer_id}\nCustomer Phone: {customer_phone}\nSalesperson ID: {salesperson_id}\n\nCustomer Personality: {customer_personality}\nEmotion Timeline: \n{customer_emotion}\n\nSummary: \n{summary}\n\nTodo: \n{todo}\n"
 
         return summary
     

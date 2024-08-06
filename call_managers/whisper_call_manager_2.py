@@ -12,19 +12,20 @@ from call_managers.call_manager import CallManager
 from model.call_log import CallLog
 
 class WhisperCallManager2(CallManager):
-    def __init__(self, add_call_log_callback, salesperson_device_id_callback, customer_device_id_callback):
+    def __init__(self, add_call_log_callback, salesperson_device_id_callback, customer_device_id_callback, call_state_callback):
         # add_call_log_callback is a function that takes a CallLog object as an argument
         # This updates the model with the new call log
         self.add_call_log_callback = add_call_log_callback
         self.salesperson_device_id_callback = salesperson_device_id_callback
         self.customer_device_id_callback = customer_device_id_callback
-        self.state = CallManagerState.IDLE
+        self.call_state_callback = call_state_callback
+
+        self.file_count = 1
+        self.set_state(CallManagerState.IDLE)
 
         self.salesperson_data_queue = Queue()
         self.customer_data_queue = Queue()
         self.unified_queue = Queue()
-
-        self.file_count = 1
 
         def callback_salesperson(recognizer, audio): 
             raw_data = audio.get_raw_data()
@@ -100,9 +101,7 @@ class WhisperCallManager2(CallManager):
                 sleep(0.1)
 
 
-    def start_call(self, call_state_callback):
-        self.call_state_callback = call_state_callback
-
+    def start_call(self):
         self.state = self.set_state(CallManagerState.STARTING_CALL)
         self.call = True
 

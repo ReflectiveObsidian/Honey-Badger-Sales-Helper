@@ -1,3 +1,5 @@
+CALL_MANAGER_DEMO_MODE = True
+
 import queue
 import threading
 import TKinterModernThemes as TKMT
@@ -50,24 +52,29 @@ class Controller(TKMT.ThemedTKinterFrame):
 
         salesperson_device_id_callback = lambda: self.model.get_salesperson_sound_device_id()
         customer_device_id_callback = lambda: self.model.get_customer_sound_device_id()
+        call_state_callback = self.model.set_call_state
         '''self.call_manager = CallStub(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
             customer_device_id_callback) # To Replace'''
-        self.call_manager = WhisperCallManager2(
+        if CALL_MANAGER_DEMO_MODE:
+            self.call_manager = DemoSalesCallManager(
+                lambda call_log: self.model.add_call_log(call_log),
+                salesperson_device_id_callback,
+                customer_device_id_callback,
+                call_state_callback)
+        else:
+            self.call_manager = WhisperCallManager2(
             lambda call_log: self.model.add_call_log(call_log),
             salesperson_device_id_callback,
-            customer_device_id_callback)
-        '''self.call_manager = DemoSalesCallManager(
-            lambda call_log: self.model.add_call_log(call_log),
-            salesperson_device_id_callback,
-            customer_device_id_callback)'''
+            customer_device_id_callback,
+            call_state_callback)
 
     def handle_start_call(self):
         self.model.initialise()
 
         #self.call_manager.start_call()
-        self.call_manager_thread = threading.Thread(target=self.call_manager.start_call, args=[self.handle_call_manager_state])
+        self.call_manager_thread = threading.Thread(target=self.call_manager.start_call)
         self.call_manager_thread.start()
 
         self.llm_chat_processor.set_prompt(PromptType.WARNINGS, self.model.get_call_logs(), lambda todo: self.model.set_warnings(todo), True)

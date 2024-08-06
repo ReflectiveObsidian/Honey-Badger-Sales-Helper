@@ -4,19 +4,24 @@ from datetime import datetime
 from time import sleep
 
 from call_managers.call_manager import CallManager
+from call_managers.call_manager_state import CallManagerState
 from model.call_log import CallLog
 
 
 class DemoSalesCallManager(CallManager):
-    def __init__(self, add_call_log_callback, salesperson_device_id_callback, customer_device_id_callback):
+    def __init__(self, add_call_log_callback, salesperson_device_id_callback, customer_device_id_callback, call_state_callback):
         # add_call_log_callback is a function that takes a CallLog object as an argument
         # This updates the model with the new call log
         self.add_call_log_callback = add_call_log_callback
         self.salesperson_device_id_callback = salesperson_device_id_callback
         self.customer_device_id_callback = customer_device_id_callback
+        self.call_state_callback = call_state_callback
+
         self.inCall = False
+        self.set_state(CallManagerState.IDLE)
 
     def start_call(self):
+        self.state = self.set_state(CallManagerState.STARTING_CALL)
         self.inCall = True
         # Generated with ChatGPT
         sales_agent_quotes = [
@@ -37,6 +42,8 @@ class DemoSalesCallManager(CallManager):
         speaker = 'Customer'
         badger_content_id = 0
         mink_content_id = 0
+
+        self.state = self.set_state(CallManagerState.ON_CALL)
     
         while self.inCall == True:
             if speaker == 'Customer':
@@ -65,6 +72,15 @@ class DemoSalesCallManager(CallManager):
                     sleep(10)
 
             sleep(5)
+        self.state = self.set_state(CallManagerState.IDLE)
 
     def end_call(self):
+        self.state = self.set_state(CallManagerState.ENDING_CALL)
         self.inCall = False
+
+    def get_state(self):
+        return self.state
+    
+    def set_state(self, state):
+        self.state = state
+        self.call_state_callback(self.state)

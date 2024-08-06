@@ -165,17 +165,12 @@ class View:
         
 
     def handle_start_call(self):
-        self.controller.handle_start_call()
         self.start_button.config(state="disabled")
-        self.end_button.config(state="normal")
-        self.salesperson_device_entry.config(state="disabled")
-        self.customer_device_entry.config(state="disabled")
+        self.controller.handle_start_call()
         
     def handle_end_call(self):
-        self.start_button.config(state="normal")
+        self.end_button.config(state="disabled")
         self.controller.handle_end_call()
-        self.salesperson_device_entry.config(state="normal")
-        self.customer_device_entry.config(state="normal")
 
     def update(self, model):
         self.call_logs.delete('1.0', tk.END)
@@ -206,6 +201,19 @@ class View:
                 self.call_status.config(text="On call")
             elif call_status == CallManagerState.ENDING_CALL:
                 self.call_status.config(text="Ending call")
+
+        if call_status == CallManagerState.IDLE:
+            self.start_button.config(state="normal")
+            self.salesperson_device_entry.config(state="normal")
+            self.customer_device_entry.config(state="normal")
+
+        if call_status != CallManagerState.IDLE:
+            self.start_button.config(state="disabled")
+            self.salesperson_device_entry.config(state="disabled")
+            self.customer_device_entry.config(state="disabled")
+
+        if call_status == CallManagerState.ON_CALL:
+            self.end_button.config(state="normal")
 
         self.call_done_view.update(model)
 

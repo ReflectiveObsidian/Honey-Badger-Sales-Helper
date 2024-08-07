@@ -32,6 +32,7 @@ from chat_processors.text2MBTI_chat_processor import Text2MBTIChatProcessor
 class Controller(TKMT.ThemedTKinterFrame):
     def __init__(self):
         super().__init__("Honey Badger Sales Helper", "sun-valley", "light")
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(width=False, height=False)
         self.view = View(self.root, self)
         self.model = Model(self.view)
@@ -157,6 +158,10 @@ class Controller(TKMT.ThemedTKinterFrame):
     def handle_salesperson_id(self, salesperson_id):
         self.model.set_salesperson_id(salesperson_id)
         
+    def on_closing(self):
+        self.llm_chat_processor.unload_llm()
+        self.root.destroy()
+
 if __name__ == "__main__":
     app = Controller()
     app.run()

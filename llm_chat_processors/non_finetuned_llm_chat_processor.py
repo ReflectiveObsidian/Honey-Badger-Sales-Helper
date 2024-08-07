@@ -161,3 +161,6 @@ class NonFinetunedLLMChatProcessor(LLMChatProcessor):
         # --------------------------------------------------
         self.active = False
 
+    def unload_llm(self):
+        self.llm.close()
+        print("close llm")

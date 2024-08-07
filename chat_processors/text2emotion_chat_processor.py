@@ -16,7 +16,7 @@ class Text2EmotionChatProcessor(ChatProcessor):
         # Select chat logs with speaker as customer
         chat_logs = [chat_log for chat_log in chat_logs if chat_log.speaker == "Customer"]
         # Select last 3 chat logs
-        chat_logs = chat_logs[-3:]
+        chat_logs = chat_logs[-1:]
         # Get the text from the chat logs
         text = " ".join([chat_log.content for chat_log in chat_logs])
         # Get the emotions from the text

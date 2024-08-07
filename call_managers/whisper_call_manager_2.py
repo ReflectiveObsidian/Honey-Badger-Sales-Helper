@@ -210,7 +210,7 @@ class WhisperCallManager2(CallManager):
         self.state = self.set_state(CallManagerState.IDLE)
         
 
-    def recognize_faster_whisper(self, audio_data, model="large-v3", device="cuda", compute_type ="auto", cpu_threads=8):
+    def recognize_faster_whisper(self, audio_data, model="medium.en", device="cpu", compute_type ="auto", cpu_threads=4):
         assert isinstance(audio_data, sr.AudioData)
         import numpy as np
         import soundfile as sf
